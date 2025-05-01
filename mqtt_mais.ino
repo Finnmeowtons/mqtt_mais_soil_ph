@@ -2,11 +2,12 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 #include <ArduinoJson.h>
+#include <WiFiManager.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <SoftwareSerial.h>
 
-#define device_id 4  // Device ID number!!!
+#define device_id 4  // Device ID number!!! //TODO Change Device Number
 
 // WiFi & MQTT Setup
 const char* ssid = "tp-link";
@@ -33,7 +34,7 @@ DHT dht(DHTPin, DHTTYPE);
 OneWire oneWire(DS18B20_PIN);
 DallasTemperature DS18B20(&oneWire);
 
-#define SENSOR_TOPIC "sensor/device4/data"  // Single topic for JSON data
+#define SENSOR_TOPIC "sensor/device4/data"  // Single topic for JSON data //TODO Change Device Number
 
 unsigned long lastSensorSend = 0;
 const unsigned long SENSOR_INTERVAL = 5000;  // 5 seconds
@@ -52,8 +53,20 @@ void setup() {
   digitalWrite(DE, LOW);
   digitalWrite(RE, LOW);
 
+  // Initialize WiFi using WiFiManager
+  WiFiManager wifiManager;
 
-  WiFi.begin(ssid, password);
+  // Uncomment to reset saved credentials (for testing)
+  wifiManager.resetSettings();
+
+  if (!wifiManager.autoConnect("MAIS-DEVICE4")) { //TODO Change Device Number
+    Serial.println("Failed to connect and hit timeout");
+    ESP.restart();
+    delay(1000);
+  }
+
+
+  // WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -222,7 +235,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Connecting to MQTT...");
-    if (client.connect("Device4")) {
+    if (client.connect("Device4")) { //TODO Change Device Number
       Serial.println("✅ Connected!");
     
       client.subscribe("mais/animal");
